@@ -1,20 +1,24 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import { Provider } from 'react-redux';
-import { applyMiddleware, compose } from 'redux' 
-import { configureStore } from '@reduxjs/toolkit'
+import  express  from 'express'
+import mongoose from 'mongoose'
+import cors from 'cors'
 
-import  thunk  from 'redux-thunk' 
-import Reducers from './reducers'
+import userRoutes from './routes/users.js'
 
-const store = configureStore(Reducers, compose(applyMiddleware(thunk)))
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <Provider store={store}>  
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  </Provider>,
-);
+const app = express();
+app.use(express.json({limit: "30mb", extended: true}))
+app.use(express.urlencoded({limit: "30mb", extended: true}))
+app.use(cors());
+
+app.get('/',(req, res) =>{
+    res.send("This is a stack overflow clone API")
+})
+
+app.use('/user', userRoutes)
+
+const PORT = process.env.PORT || 5000
+
+const CONNECTION_URL = "mongodb+srv://admin:admin@stack-overflow-clone.fnsbghq.mongodb.net/?retryWrites=true&w=majority"
+
+mongoose.connect(CONNECTION_URL,{useNewUrlparser: true, useUnifiedTopology: true})
+    .then(() => app.listen(PORT,() => {console.log(`server running on port ${PORT}`)}))
+    .catch((err) => console.log(err.message))
